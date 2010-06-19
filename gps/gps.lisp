@@ -2,15 +2,25 @@
 (setq calles '((1 (Paseo Colon))(2 Independencia)(3 EEUU)(4 Balcarce)(5 Chile)
 			   (6 Venezuela)(7 Mexico)(8 Defensa)(9 Belgrano)))
 
+(setq esquinas '((a(1 2)) (b(1 5)) (c(1 7)) (d(1 6)) (e(1 9)) (f(4 2)) 
+				 (g(2 8)) (h(8 5)) (i(8 7)) (j(8 6)) (k(8 9)) (l(9 4))))
+
 (setq nodos '((a (b f)) (b (a c)) (c (b d)) (d (c e j)) (e (d)) (f(g))
 			   (g(h)) (h (b i)) (i(c j)) (j(k)) (k(l)) (l(e))))
 
-(setq grafo '((a (e c b ))(b (c d))(c (b))(d())(e(d))))
-;(setq grafo '((a (b c)) (d (e))))
 
 (defun pertenece (x l)
 	(if (null l) nil
 		(if (equal x (car l)) t (pertenece x (cdr l)))
+	)
+)
+
+(defun interseccion (x y) 
+	(if (null x) nil
+		(if (pertenece (car x) y)
+			(cons (car x) (interseccion (cdr x) y))
+			(interseccion (cdr x) y)
+		) 
 	)
 )
 
@@ -50,7 +60,7 @@
 	(if (null caminos) nil
 		(if (equal f (caar caminos))
 			(cons (car caminos) (gps i f (cdr caminos)))
-			(gps i f (append (distribuir (car caminos) (diferencia (vecinos (caar caminos) grafo) (car caminos) ) )
+			(gps i f (append (distribuir (car caminos) (diferencia (vecinos (caar caminos) nodos) (car caminos) ) )
 						(cdr caminos)))
 		)
 	) 
@@ -82,7 +92,7 @@
 	)
 )
 
-(defun traducircamino (camino calles)
+(defun traducircamino2 (camino calles)
 	(if (null camino) nil
 		(cons (buscarcalle (car camino) calles)
 			  (traducircamino (cdr camino) calles)
@@ -96,10 +106,34 @@
 	)
 )
 
+(defun getcallesesquina (idesquina esquinas)
+	(if (null esquinas) nil
+		(if (equal (caar esquinas) idesquina) (cadar esquinas)
+			(getcallesesquina idesquina (cdr esquinas))
+		)
+	)
+)
+
+(defun traducircamino (camino esquinas calles)
+	(if (equal (length camino) 1) nil
+		(cons  (buscarcalle (car (interseccion (getcallesesquina (car camino) esquinas) (getcallesesquina (cadr camino) esquinas))) calles)
+			  (traducircamino (cdr camino) esquinas calles))
+	)
+)
+
+
+
 ;(trace vecinos);(trace gps)
 (gps 'a 'd )
 (caminomin 'a 'd)
 (caminomax 'a 'd)
-(buscarcalle 'a nodos)
-(traducircamino '(b d a) nodos)
-(traducirrutas (caminomin 'a 'd) nodos)
+;(buscarcalle '(3) calles)
+;(getcallesesquina 'a esquinas)
+;(getcallesesquina 'b esquinas)
+;(interseccion (getcallesesquina 'a esquinas) (getcallesesquina 'b esquinas))
+
+(traducircamino (caminomax 'a 'd) esquinas calles)
+;(trace buscarcalle)
+;(trace traducircamino(trace traducircamino))
+;(traducircamino '(a b c d) esquinas calles)
+;(traducirrutas (caminomin 'a 'd) nodos)
