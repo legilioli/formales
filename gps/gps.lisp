@@ -79,7 +79,7 @@
 		(if (equal (length (car l)) min)
 			 (obtenerminmaxlong (cdr l) f min (cons (car l) minimos))
 			 (obtenerminmaxlong (cdr l) f ( if (funcall f (length (car l)) min) (length (car l)) min)
-				(if (funcall f (length (car l)) min) (car l) (list minimos)))
+				(if (funcall f (length (car l)) min) (list (car l))  minimos ))
 		)
 	)
 )
@@ -92,17 +92,10 @@
 	)
 )
 
-(defun traducircamino2 (camino calles)
-	(if (null camino) nil
-		(cons (buscarcalle (car camino) calles)
-			  (traducircamino (cdr camino) calles)
-		)
-	)
-)
 
-(defun traducirrutas (caminos calles)
+(defun traducirrutas (caminos esquinas calles)
 	(if (null caminos) nil
-		(cons (traducircamino (car caminos) calles) (traducirrutas (cdr caminos) calles))
+		(cons (traducircamino (car caminos) esquinas calles) (traducirrutas (cdr caminos) esquinas calles))
 	)
 )
 
@@ -122,6 +115,21 @@
 )
 
 
+(defun comprimir (recorrido resumen actual)
+	(if (null recorrido) (append resumen (list actual))
+		(if (null actual) (comprimir (cdr recorrido) resumen (list (car recorrido) 1))
+			(if (equal (car recorrido) (car actual)) (comprimir (cdr recorrido) resumen (list (car actual) (+ (cadr actual) 1)))
+			(comprimir (cdr recorrido) (append resumen (list actual)) (list (car recorrido) 1))
+			)
+		)
+	)
+)
+
+(defun describircamino (recorrido descripcion calleactual )
+
+)
+
+
 
 ;(trace vecinos);(trace gps)
 (gps 'a 'd )
@@ -131,9 +139,11 @@
 ;(getcallesesquina 'a esquinas)
 ;(getcallesesquina 'b esquinas)
 ;(interseccion (getcallesesquina 'a esquinas) (getcallesesquina 'b esquinas))
-
-(traducircamino (caminomax 'a 'd) esquinas calles)
+;(obtenerminmaxlong '((a b c)(a e c)) '< 9999 nil) 
+;(traducircamino (caminomax 'a 'd) esquinas calles)
 ;(trace buscarcalle)
 ;(trace traducircamino(trace traducircamino))
-;(traducircamino '(a b c d) esquinas calles)
-;(traducirrutas (caminomin 'a 'd) nodos)
+(trace describircamino)
+;(describircamino '(a a b) nil nil ) 
+(traducirrutas (caminomax 'a 'd) esquinas calles)
+(comprimir (car (traducirrutas (caminomax 'a 'd) esquinas calles))  nil nil)
