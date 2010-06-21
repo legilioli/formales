@@ -125,8 +125,13 @@
 	)
 )
 
-(defun describircamino (recorrido descripcion calleactual )
 
+(defun describir (rec desc calleactual)
+	(if (null rec)  (append desc (list '(hasta llegar a destino.)) )
+		(if (null calleactual) (describir (cdr rec) (append desc (list '(avance por) (caar rec))) (caar rec))
+			(describir (cdr rec) (append desc (list '(y gire en) (caar rec) '(y avance) (cadar rec) '(cuadras)) ) (caar rec))
+		)
+	)
 )
 
 
@@ -143,7 +148,7 @@
 ;(traducircamino (caminomax 'a 'd) esquinas calles)
 ;(trace buscarcalle)
 ;(trace traducircamino(trace traducircamino))
-(trace describircamino)
+;(trace describir)
 ;(describircamino '(a a b) nil nil ) 
 (traducirrutas (caminomax 'a 'd) esquinas calles)
-(comprimir (car (traducirrutas (caminomax 'a 'd) esquinas calles))  nil nil)
+(describir (comprimir (car (traducirrutas (caminomax 'a 'd) esquinas calles))  nil nil) nil nil)
