@@ -53,8 +53,19 @@
 	(tableronm n n)
 )
 
-(defun retroceder (tablero  historial)
-	(cons (cdar historial) tablero)
+
+(defun retrocederhistorial (historial)
+	(if (null historial) nil
+		(if (equal (length (car historial)) 1) (retrocederhistorial (cdr historial)) 
+				( cons (cdr (car historial))  (cdr historial))
+		)
+	)
+)
+
+(defun retrocedertablero (tablero  historial n)
+	(if (null historial) tablero
+		(retrocedertablero (removerinvalidos (caar historial) tablero n) (cdr historial) n)
+	)
 )
 
 (defun eliminarposicion (l pos)
@@ -116,7 +127,7 @@
 (defun reinas (n tablero historial)
 	(if (equal (length historial) n) historial
 		(if (null tablero)
-				(reinas n (retroceder tablero historial) (cdr historial))
+				(reinas n (retrocedertablero (tablero n)  (retrocederhistorial historial) n) (retrocederhistorial historial))
 				(reinas n (removerinvalidos (caar tablero) tablero n) (cons (car tablero) historial))
 		)
 	)
@@ -132,7 +143,8 @@
 ;(eliminarposiciones (tablero 4) (elementosdiagonald '(1 1) 4))
 ;(removerinvalidos '(1 1) (tablero 4))
 ;(trace elementosdiagonald)
-(trace elementosdiagonali)
-(trace reinas)
-(reinas 4 (tablero 4) nil)
-
+;;(trace elementosdiagonali)
+;(trace reinas)
+(mapcar 'car (reinas 19 (tablero 19) nil))
+;(trace retrocederhistorial)
+;(retrocedertablero (tablero 4) (retrocederhistorial '(((4 2))((2 3)(2 4))((1 1)(1 3)(1 3)(1 4)))) 4)
