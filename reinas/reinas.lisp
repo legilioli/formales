@@ -105,28 +105,21 @@
 	)
 )
 
-(defun eliminarvacios(l)
-	(if (null l) nil
-		(if (null (car l)) (eliminarvacios (cdr l))
-			(cons (car l) (eliminarvacios (cdr l)))
-		)
-	)
-)
 
 (defun removerinvalidos (pos tablero n)
-(eliminarvacios	(eliminarposiciones
+	(eliminarposiciones
 		(eliminarposiciones (eliminarcolumna (cdr tablero) (cadr pos)) 
 					(elementosdiagonald pos n)
 		)
 		(elementosdiagonali pos n)
-	))
+	)
 )
 
 
 
 (defun reinas (n tablero historial)
 	(if (equal (length historial) n) historial
-		(if (null tablero)
+		(if (or (null (car tablero) ) (null tablero))
 				(reinas n (retrocedertablero (tablero n)  (retrocederhistorial historial) n) (retrocederhistorial historial))
 				(reinas n (removerinvalidos (caar tablero) tablero n) (cons (car tablero) historial))
 		)
@@ -147,7 +140,7 @@
 ;(removerinvalidos '(1 1) (tablero 4))
 ;(trace elementosdiagonald)
 ;;(trace elementosdiagonali)
-(trace reinas)
+;(trace reinas)
 ;(mapcar 'car (reverse (reinas 19 (tablero 19) nil)))
 (print (start (read )))
 ;(trace retrocederhistorial)
