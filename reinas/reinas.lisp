@@ -133,6 +133,9 @@
 	)
 )
 
+(defun start (n)
+	(mapcar 'car (reverse (reinas n (tablero n) nil)))
+)
 ;(tablero 4)
 
 ;(trace eliminardiagonald)
@@ -144,7 +147,8 @@
 ;(removerinvalidos '(1 1) (tablero 4))
 ;(trace elementosdiagonald)
 ;;(trace elementosdiagonali)
-;(trace reinas)
-(mapcar 'car (reinas 19 (tablero 19) nil))
+(trace reinas)
+;(mapcar 'car (reverse (reinas 19 (tablero 19) nil)))
+(print (start (read )))
 ;(trace retrocederhistorial)
 ;(retrocedertablero (tablero 4) (retrocederhistorial '(((4 2))((2 3)(2 4))((1 1)(1 3)(1 3)(1 4)))) 4)
