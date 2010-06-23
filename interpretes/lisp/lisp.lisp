@@ -1,51 +1,69 @@
 ;interprete de lisp en lisp
 
-(defun esoperador (op exp)
-	(equal (car exp) op)
+(defun esoperador (op expr)
+	(equal (car expr) op)
 )
 
-(defun buscar (exp amb)
-	exp
+(defun buscar (expr amb)
+	expr
 )
 
-(defun procesar_atomo (exp amb)
+(defun procesar_atomo (expr amb)
 	(cond
-		((equal exp t) t)
-		((numberp exp) exp)
-		(t (buscar exp amb))
+		((equal expr t) t)
+		((numberp expr) expr)
+		(t (buscar expr amb))
 	)
 )
 
-(defun procesar_and (exp amb)
-	(if (evaluar (cadr exp) amb) 
-			(evaluar (caddr exp) amb)
+(defun procesar_and (expr amb)
+	(if (evaluar (cadr expr) amb) 
+			(evaluar (caddr expr) amb)
 			nil
 	)
 )
 
-(defun procesar_or (exp amb)
-	(if (evaluar (cadr exp) amb)
+(defun procesar_or (expr amb)
+	(if (evaluar (cadr expr) amb)
 			t
-			(evaluar (caddr exp) amb)
+			(evaluar (caddr expr) amb)
 	)
 )
 
-(defun procesar_if (exp amb)
-	(if (evaluar (cadr exp) amb)
-		(evaluar (caddr exp) amb)
-		(evaluar (cadddr exp) amb)
+(defun procesar_if (expr amb)
+	(if (evaluar (cadr expr) amb)
+		(evaluar (caddr expr) amb)
+		(evaluar (cadddr expr) amb)
 	)
 )
 
-(defun evaluar (exp amb)
-	(if (null exp) nil
-		(if (atom exp) (procesar_atomo exp amb)
+(defun aplicar (f args amb)
+	(if (atom f)
+		(cond
+			((equal f 'car)(caar args))
+			((equal f 'cdr)(cdar args))
+			((equal f 'list)(args))
+			((equal f 'cons)(cons (car args) (cadr args)))
+			(t 'error)
+		)
+	)
+)
+
+(defun evaluarlista (l amb)
+	(if (null l) nil
+		(cons (evaluar (car l) amb) (evaluarlista (cdr l) amb))
+	)
+)
+
+(defun evaluar (expr amb)
+	(if (null expr) nil
+		(if (atom expr) (procesar_atomo expr amb)
 			(cond
-				((esoperador 'quote exp) (cadr exp))
-				((esoperador 'and exp) (procesar_and exp amb))
-				((esoperador 'or exp) (procesar_or exp amb))
-				((esoperador 'if exp) (procesar_if exp amb))
-				(t nil)
+				((esoperador 'quote expr) (cadr expr))
+				((esoperador 'and expr) (procesar_and expr amb))
+				((esoperador 'or expr) (procesar_or expr amb))
+				((esoperador 'if expr) (procesar_if expr amb))
+				(t (aplicar (evaluar (car expr) amb) (evaluarlista (cdr expr) amb) amb))
 			)
 		)
 	)
@@ -68,4 +86,9 @@
 ;if
 (evaluar '(if nil 'verdadero 'falso) nil)
 (evaluar '(if t 'verdadero 'falso) nil)
-
+;car
+(evaluar '(car (quote (1 2 3))) nil)
+;cdr
+(evaluar '(cdr (quote (1 2 3))) nil)
+;cons
+(evaluar '(cons 1 (quote (2 3 4))) nil)
