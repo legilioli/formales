@@ -4,15 +4,25 @@
 	(equal (car expr) op)
 )
 
-(defun buscar (expr amb)
-	expr
+(defun extenderamb (lp la amb)
+	(if (null lp) amb
+		(cons (list (car lp) (car la)) (extenderamb (cdr lp) (cdr la) amb))
+	)
+)
+
+(defun buscaramb (expr amb)
+	(if (null amb) 'ELEMENTO_NO_DEFINIDO
+		(if (equal (caar amb) expr) (cadar amb)
+			(buscaramb expr (cdr amb))
+		)
+	)
 )
 
 (defun procesar_atomo (expr amb)
 	(cond
 		((equal expr t) t)
 		((numberp expr) expr)
-		(t (buscar expr amb))
+		(t (buscaramb expr amb))
 	)
 )
 
@@ -44,7 +54,21 @@
 			((equal f 'cdr)(cdar args))
 			((equal f 'list)(args))
 			((equal f 'cons)(cons (car args) (cadr args)))
+			((equal f 'not)(not (car args)))
+			((equal f '+)(+ (car args) (cadr args)))
+			((equal f '-)(- (car args) (cadr args)))
+			((equal f '*)(* (car args) (cadr args)))
+			((equal f '<)(< (car args) (cadr args)))
+			((equal f '>)(> (car args) (cadr args)))
+			((equal f '>=)(>= (car args) (cadr args)))
+			((equal f '>=)(>= (car args) (cadr args)))
+			((equal f '=)(= (car args) (cadr args)))
+			;((equal f 'mapcar) ())
 			(t 'error)
+		)
+		(cond
+			((equal (car f) 'lambda) (evaluar (caddr f) (extenderamb (cadr f) args amb)) );LAMBDAS
+			(T 'EXPRESION_NO_SOPORTADA)
 		)
 	)
 )
@@ -63,7 +87,8 @@
 				((esoperador 'and expr) (procesar_and expr amb))
 				((esoperador 'or expr) (procesar_or expr amb))
 				((esoperador 'if expr) (procesar_if expr amb))
-				(t (aplicar (evaluar (car expr) amb) (evaluarlista (cdr expr) amb) amb))
+				((esoperador 'lambda expr) expr)
+				(t (aplicar (car expr) (evaluarlista (cdr expr) amb) amb))
 			)
 		)
 	)
@@ -91,4 +116,14 @@
 ;cdr
 (evaluar '(cdr (quote (1 2 3))) nil)
 ;cons
+
 (evaluar '(cons 1 (quote (2 3 4))) nil)
+;otras func
+;(evaluar '((if t 'car 'cdr ) (quote (1 2 3)) ) nil)
+;(evaluar '((if nil 'car 'cdr ) (quote (1 2 3)) ) nil)
+;lambda 
+;(trace aplicar)
+(evaluar '(lambda (x) (+ x 1)) nil)
+(evaluar '((lambda (x) (not x)) nil) nil)
+;(evaluar 'pp nil)
+
