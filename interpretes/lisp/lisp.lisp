@@ -1,9 +1,5 @@
 ;interprete de lisp en lisp
 
-(defun esoperador (op expr)
-	(equal (car expr) op)
-)
-
 (defun extenderamb (lp la amb)
 	(if (null lp) amb
 		(cons (list (car lp) (car la)) (extenderamb (cdr lp) (cdr la) amb))
@@ -47,28 +43,10 @@
 	)
 )
 
-(defun aplicar (f args amb)
-	(if (atom f)
-		(cond
-			((equal f 'car)(caar args))
-			((equal f 'cdr)(cdar args))
-			((equal f 'list)(args))
-			((equal f 'cons)(cons (car args) (cadr args)))
-			((equal f 'not)(not (car args)))
-			((equal f '+)(+ (car args) (cadr args)))
-			((equal f '-)(- (car args) (cadr args)))
-			((equal f '*)(* (car args) (cadr args)))
-			((equal f '<)(< (car args) (cadr args)))
-			((equal f '>)(> (car args) (cadr args)))
-			((equal f '>=)(>= (car args) (cadr args)))
-			((equal f '>=)(>= (car args) (cadr args)))
-			((equal f '=)(= (car args) (cadr args)))
-			;((equal f 'mapcar) ())
-			(t 'error)
-		)
-		(cond
-			((equal (car f) 'lambda) (evaluar (caddr f) (extenderamb (cadr f) args amb)) );LAMBDAS
-			(T 'EXPRESION_NO_SOPORTADA)
+(defun procesar_cond (condlist amb)
+	(if (null condlist) nil
+		(if (caar condlist) (evaluar (cadar condlist) amb)
+			(procesar_cond (cdr condlist) amb)
 		)
 	)
 )
@@ -79,15 +57,56 @@
 	)
 )
 
+(defun aplicar (f args amb)
+	(if (atom f)
+		(cond
+			((equal f 'atom)(atom (car args)))
+			((equal f 'listp)(listp (car args)))
+			((equal f 'symbolp)(symbolp (car args)))
+			((equal f 'numberp)(numberp (car args)))
+			((equal f 'null)(null (car args)))
+			((equal f 'length)(length (car args)))
+			((equal f 'car)(caar args))
+			((equal f 'cdr)(cdar args))
+			((equal f 'list) args)
+			((equal f 'cons)(cons (car args) (cadr args)))
+			((equal f 'not)(not (car args)))
+			((equal f '+)(+ (car args) (cadr args)))
+			((equal f '-)(- (car args) (cadr args)))
+			((equal f '*)(* (car args) (cadr args)))
+			((equal f '/)(/ (car args) (cadr args)))
+			((equal f 'expt)(expt (car args) (cadr args)))
+			((equal f 'rem)(rem (car args) (cadr args)))
+			((equal f 'sqrt)(sqrt (car args) (cadr args)))
+			((equal f '<)(< (car args) (cadr args)))
+			((equal f '>)(> (car args) (cadr args)))
+			((equal f '>=)(>= (car args) (cadr args)))
+			((equal f '>=)(>= (car args) (cadr args)))
+			((equal f '=)(= (car args) (cadr args)))
+			((equal f 'eq)(eq (car args) (cadr args)))
+			((equal f 'equal)(equal (car args) (cadr args)))
+			((equal f 'mapcar) (mapcar (car args) (cadr args)))
+			((equal f 'apply) (apply (car args) (cadr args)))
+			((equal f 'funcall) (apply (car args) (cdr args)))
+			(t 'error)
+		)
+		(cond
+			((equal (car f) 'lambda) (evaluar (caddr f) (extenderamb (cadr f) args amb)) );LAMBDAS
+			(T 'EXPRESION_NO_SOPORTADA)
+		)
+	)
+)
+
 (defun evaluar (expr amb)
 	(if (null expr) nil
 		(if (atom expr) (procesar_atomo expr amb)
 			(cond
-				((esoperador 'quote expr) (cadr expr))
-				((esoperador 'and expr) (procesar_and expr amb))
-				((esoperador 'or expr) (procesar_or expr amb))
-				((esoperador 'if expr) (procesar_if expr amb))
-				((esoperador 'lambda expr) expr)
+				((equal (car expr) 'quote) (cadr expr))
+				((equal (car expr) 'and ) (procesar_and expr amb))
+				((equal (car expr) 'or ) (procesar_or expr amb))
+				((equal (car expr) 'if ) (procesar_if expr amb))
+				((equal (car expr) 'cond ) (procesar_cond (cdr expr) amb))
+				((equal (car expr) 'lambda ) expr)
 				(t (aplicar (car expr) (evaluarlista (cdr expr) amb) amb))
 			)
 		)
@@ -108,22 +127,24 @@
 (evaluar '(or nil t) nil)
 (evaluar '(or t nil) nil)
 (evaluar '(or nil nil) nil)
-;if
 (evaluar '(if nil 'verdadero 'falso) nil)
 (evaluar '(if t 'verdadero 'falso) nil)
-;car
 (evaluar '(car (quote (1 2 3))) nil)
-;cdr
 (evaluar '(cdr (quote (1 2 3))) nil)
-;cons
-
 (evaluar '(cons 1 (quote (2 3 4))) nil)
-;otras func
-;(evaluar '((if t 'car 'cdr ) (quote (1 2 3)) ) nil)
-;(evaluar '((if nil 'car 'cdr ) (quote (1 2 3)) ) nil)
-;lambda 
-;(trace aplicar)
 (evaluar '(lambda (x) (+ x 1)) nil)
 (evaluar '((lambda (x) (not x)) nil) nil)
-;(evaluar 'pp nil)
+(evaluar '(cond (nil 'cond1) (nil 'cond2) ) nil)
+(evaluar '(mapcar 'atom (quote ((1) 2 a))) nil)
+(evaluar '(apply 'cons (quote (a (1 2))) ) nil)
+(evaluar '(funcall 'cons 1 (quote (a b)) ) nil)
+(evaluar '(atom 1) nil)
+(evaluar '(listp (quote (1 2 3)) ) nil)
+(evaluar '(atom (quote (1 2 3)) ) nil)
+(evaluar '(listp 1 ) nil)
+(evaluar '(length (quote (1 2 3)) ) nil)
+(evaluar '(null nil ) nil)
+(evaluar '(list 1 2 3 ) nil)
+
+;(print (evaluar (read ) nil))
 
