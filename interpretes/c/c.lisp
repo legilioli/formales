@@ -35,20 +35,23 @@
 	(equal (caar prg) f)
 )
 
+(defun procesar_if (prg ent mem salida)
+	(if (not (equal (evaluar (cadar prg) mem) 0)) 
+		(ejecutar (append (list (nth 2 (car prg))) (cdr prg)) ent mem salida); ejecuto if
+		(if (equal (length (car prg)) 5) (ejecutar (append (list (nth 4 (car prg))) (cdr prg)) ent mem salida)
+						(ejecutar (cdr prg) ent mem salida)
+		) ;ejecuto else
+	)
+)
+
 (defun ejecutar (prg ent mem &optional (salida nil))
 	(if (null prg) salida
 		(cond
 			( (esfuncion prg 'scanf) (ejecutar (cdr prg)(cdr ent) (asociar (cadar prg)(car ent) mem) salida))
 			( (esfuncion prg 'printf) (ejecutar (cdr prg) ent mem (cons (evaluar (cadar prg) mem) salida) ) )
 			( (esasignacion (car prg)) (ejecutar (cdr prg) ent (asignacion (car prg) mem) salida ) )
-			( (esfuncion prg 'if) 
-				(if (not (equal (evaluar (cadar prg) mem) 0)) 
-					(ejecutar (append (list (nth 2 (car prg))) (cdr prg)) ent mem salida); ejecuto if
-					(if (equal (length (car prg)) 5) (ejecutar (append (list (nth 4 (car prg))) (cdr prg)) ent mem salida)
-						(ejecutar (cdr prg) ent mem salia)
-					) ;ejecuto else
-				))
-	
+			( (esfuncion prg 'if) (procesar_ifi prg ent mem salida))
+			( (esfuncion prg 'while) ())
 			(t (list 'syntax_error  prg ))	
 		)
 	)
