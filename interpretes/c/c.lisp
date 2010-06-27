@@ -1,4 +1,58 @@
 
+(defun inf_a_pref (expr ops vars)
+	(if (null expr) (componer_expresion ops vars)
+		(if (esoperador (car expr))
+			(if (> (length ops) 0)
+				(if (< (prioridad_op (car expr)) (prioridad_op (car ops)))
+					(inf_a_pref (cdr expr) (cons (car expr)(cdr ops)) 
+								(cons (list (car ops) (cadr vars) (car vars)) (cddr vars) )
+					)
+					(inf_a_pref (cdr expr) (cons (car expr) ops) vars)
+				)
+				(inf_a_pref (cdr expr) (cons (car expr) ops) vars)
+			)
+			(inf_a_pref (cdr expr) ops (cons (car expr) vars))
+		)	
+	)
+)
+
+(defun componer_expresion (ops vars)
+	(if (null ops) vars
+		(componer_expresion (cdr ops) (cons (list (car ops) (cadr vars) (car vars)) (cddr vars) ))
+	)
+)
+
+(defun esoperador (el)
+	(if (null el) nil
+		(cond 
+			((equal el '+) t)
+			((equal el '*) t)
+			((equal el '-) t)
+			((equal el '/) t)
+			((equal el '<) t)
+			((equal el '>) t)
+			((equal el '<=) t)
+			((equal el '>=) t)
+			( t nil)
+		)
+	)
+)
+
+(defun prioridad_op (op)
+	(if (null op) nil
+		(cond
+			((equal op '+) 2)
+			((equal op '*) 3)
+			((equal op '-) 2)
+			((equal op '/) 3)
+			((equal op '<) 1)
+			((equal op '>) 1)
+			((equal op '<=) 1)
+			((equal op '>=) 1)
+			( t 0)
+		)
+	)
+)
 (defun agregarmem (var mem)
 	(if (null var) nil
 		(if (equal (length var) 1)
@@ -11,12 +65,25 @@
 	)
 )
 
+(defun reemplazarvars (prg mem)
+	(if (null prg) nil
+		(if (esvar (car prg) mem) 
+			(cons (buscarvar (car prg) mem) (reemplazarvars (cdr prg) mem))
+			(cons (car prg) (reemplazarvars (cdr prg) mem)) 
+		)
+	)
+)
+
 (defun evaluar (prg mem)
 	(if (atom prg) 
 		(if (esvar prg mem) (buscarvar prg mem)	
 			prg
 		)
-		nil
+		(if (null (eval (car (inf_a_pref (reemplazarvars prg mem) nil nil)))) 0
+		 	(if (equal t (eval (car (inf_a_pref (reemplazarvars prg mem) nil nil)))) 1
+				(eval (car (inf_a_pref (reemplazarvars prg mem) nil nil)))
+			)
+		)	
 	)
 )
 
@@ -53,7 +120,7 @@
 (defun asignacion (expr memoria)
 	(if (esvar (car expr) memoria) 
 		(cond
-			( (equal (nth 1 expr) '=) (asociar (car expr) (evaluar (nth 2 expr) memoria) memoria))
+			( (equal (nth 1 expr) '=) (asociar (car expr) (evaluar (cddr expr) memoria) memoria))
 			( (equal (nth 1 expr) '++) (asignacion (list (car expr) '= (car expr) '+ 1 ) memoria))
 			( (equal (nth 1 expr) '--) (asignacion (list (car expr) '= (car expr) '- 1 ) memoria))
 			( t (asignacion (list (car l) '= (car l) (nth 1 expr) (nth 3 expr)) memoria))
@@ -93,7 +160,7 @@
 )
 
 (defun procesar_while (prg ent mem salida)
-	(if (not (equal (evaluar (nth 2 (car prg))) 0))
+	(if (not (equal (evaluar (nth 1 (car prg)) mem) 0))
 		(ejecutar (append (list (nth 2 (car prg)) ) prg) ent mem salida)
 		(ejecutar (cdr prg) ent mem salida)
 	)
@@ -115,14 +182,15 @@
 (setq code '(
 	(int n j = 10 i k)
 	(main(
-		(i = 7)
-		(i ++)
- 		(++ i)
+		(i = 1)
+		(while (i < 10)
+			(i ++)
+		)
 		(-- i)
 		(i --)
 		(printf "hola_moncho")
 		(if 1 (printf "cond_true") else (printf "cond_false"))
-		(printf (i+1))
+		(printf (i))
 		)
 	)
 ))
@@ -133,63 +201,11 @@
 ;(trace asignacion)
 ;(trace agregarmem)
 ;(trace asociar)
-;(run code nil)
+(trace evaluar)
+;(trace reemplazarvars)
+;(trace inf_a_pref)
+(run code nil)
 ;(run '((int i j)(main () )) nil)
 
-(defun inf_a_pref (expr ops vars)
-	(if (null expr) (componer_expresion ops vars)
-		(if (esoperador (car expr))
-			(if (> (length ops) 0)
-				(if (< (prioridad_op (car expr)) (prioridad_op (car ops)))
-					(inf_a_pref (cdr expr) (cons (car expr)(cdr ops)) 
-								(cons (list (car ops) (car vars) (cadr vars)) (cddr vars) )
-					)
-					(inf_a_pref (cdr expr) (cons (car expr) ops) vars)
-				)
-				(inf_a_pref (cdr expr) (cons (car expr) ops) vars)
-			)
-			(inf_a_pref (cdr expr) ops (cons (car expr) vars))
-		)	
-	)
-)
 
-(defun componer_expresion (ops vars)
-	(if (null ops) vars
-		(componer_expresion (cdr ops) (cons (list (car ops) (car vars) (cadr vars)) (cddr vars) ))
-	)
-)
-
-(defun esoperador (el)
-	(if (null el) nil
-		(cond 
-			((equal el '+) t)
-			((equal el '*) t)
-			((equal el '-) t)
-			((equal el '/) t)
-			((equal el '<) t)
-			((equal el '>) t)
-			((equal el '<=) t)
-			((equal el '>=) t)
-			( t nil)
-		)
-	)
-)
-
-(defun prioridad_op (op)
-	(if (null op) nil
-		(cond
-			((equal op '+) 2)
-			((equal op '*) 3)
-			((equal op '-) 2)
-			((equal op '/) 3)
-			((equal op '<) 1)
-			((equal op '>) 1)
-			((equal op '<=) 1)
-			((equal op '>=) 1)
-			( t 0)
-		)
-	)
-)
-
-(trace inf_a_pref)
-(inf_a_pref '(g < a +  b * c ) nil nil)
+;(evaluar (inf_a_pref (reemplazarvars '(i < 333) '((i 334)) ) nil nil) '((i 0)) )
