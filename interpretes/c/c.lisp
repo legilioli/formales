@@ -11,7 +11,10 @@
 				)
 				(inf_a_pref (cdr expr) (cons (car expr) ops) vars)
 			)
-			(inf_a_pref (cdr expr) ops (cons (car expr) vars))
+			(if (atom (car expr))
+				(inf_a_pref (cdr expr) ops (cons (car expr) vars))
+				(inf_a_pref (cdr expr) ops (cons (car (inf_a_pref (car expr) nil nil)) vars))
+			)
 		)	
 	)
 )
@@ -199,6 +202,8 @@
 		(printf (i + 1))
 		(scanf n)
 		(printf n)
+		(k = ((1 + 2) * ( 3 + 1)))
+		(printf k)
 		)
 	)
 ))
@@ -216,4 +221,4 @@
 ;(run '((int i j)(main () )) nil)
 
 
-;(evaluar (inf_a_pref (reemplazarvars '(i < 333) '((i 334)) ) nil nil) '((i 0)) )
+(evaluar (car (inf_a_pref  '(< 2 (1 + 3)) nil nil)) nil )
