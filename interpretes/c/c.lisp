@@ -108,13 +108,6 @@
 	)
 )
 
-(defun pertenece (x l)
-	(if (null l) nil
-		(if (equals x (car l)) t
-			(pertenece x (cdr l))
-		)
-	)
-)
 
 (defun esvar (var mem)
 	(if (null mem) nil
