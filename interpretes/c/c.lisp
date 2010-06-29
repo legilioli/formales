@@ -53,6 +53,7 @@
 		)
 	)
 )
+
 (defun agregarmem (var mem)
 	(if (null var) nil
 		(if (equal (length var) 1)
@@ -74,7 +75,7 @@
 	)
 )
 
-(defun evaluar (prg mem)
+(defun evaluar_lisp (prg mem)
 	(if (atom prg) 
 		(if (esvar prg mem) (buscarvar prg mem)	
 			prg
@@ -85,6 +86,18 @@
 			)
 		)	
 	)
+)
+
+(defun filtrar_nil_t (resultado)
+	(cond
+		((null resultado) 0)
+		((equal resultado t) 1)
+		(t resultado)
+	)
+)
+
+(defun evaluar (prg mem)
+	(filtrar_nil_t (evaluar_lisp prg mem))
 )
 
 (defun buscarvar (var mem)
@@ -183,14 +196,16 @@
 	(int n j = 10 i k)
 	(main(
 		(i = 1)
-		(while (i < 10)
+		(while (i <= 10)
 			(i ++)
 		)
 		(-- i)
 		(i --)
 		(printf "hola_moncho")
 		(if 1 (printf "cond_true") else (printf "cond_false"))
-		(printf (i))
+		(printf (i + 1))
+		(scanf n)
+		(printf n)
 		)
 	)
 ))
@@ -201,10 +216,10 @@
 ;(trace asignacion)
 ;(trace agregarmem)
 ;(trace asociar)
-(trace evaluar)
+;(trace evaluar)
 ;(trace reemplazarvars)
 ;(trace inf_a_pref)
-(run code nil)
+(run code '(hola_mundo 20) )
 ;(run '((int i j)(main () )) nil)
 
 
