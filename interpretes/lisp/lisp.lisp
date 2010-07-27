@@ -7,7 +7,7 @@
 )
 
 (defun buscaramb (expr amb)
-	(if (null amb) 'ELEMENTO_NO_DEFINIDO
+	(if (null amb) 'NO_EXISTE
 		(if (equal (caar amb) expr) (cadar amb)
 			(buscaramb expr (cdr amb))
 		)
@@ -88,11 +88,16 @@
 			((equal f 'mapcar) (mapcar (car args) (cadr args)))
 			((equal f 'apply) (apply (car args) (cadr args)))
 			((equal f 'funcall) (apply (car args) (cdr args)))
-			(t 'error)
+			(t
+				(if (equal (buscaramb f amb) 'NO_EXISTE)
+					'error
+					(aplicar (buscaramb f amb) args amb) 
+				)
+			)
 		)
 		(cond
 			((equal (car f) 'lambda) (evaluar (caddr f) (extenderamb (cadr f) args amb)) );LAMBDAS
-			(T 'EXPRESION_NO_SOPORTADA)
+			(T (aplicar (evaluar f amb) args amb ))
 		)
 	)
 )
@@ -147,3 +152,10 @@
 (testexpr '(list 1 2 3 ))
 ;(print (evaluar (read ) nil))
 
+;TESTS
+
+(evaluar '(x 1) nil)
+
+(evaluar '((noexiste 2) 1) nil)
+
+(evaluar '((if (null t) '+ '-) 2 2) nil)
