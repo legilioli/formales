@@ -67,11 +67,11 @@
 )
 
 (defun caminomin (i f)
-	(reverse (obtenerminmaxlong (gps i f) '< 9999 nil))
+	(reverse (car (obtenerminmaxlong (gps i f) '< 9999 nil)))
 )
 
 (defun caminomax (i f)
-	(reverse (obtenerminmaxlong (gps i f) '> -1 nil))
+	(reverser (car (obtenerminmaxlong (gps i f) '> -1 nil)))
 )
 
 (defun obtenerminmaxlong (l f min minimos)
@@ -128,18 +128,20 @@
 
 (defun describir (rec desc calleactual)
 	(if (null rec)  (append desc (list '(hasta llegar a destino.)) )
-		(if (null calleactual) (describir (cdr rec) (append desc (list '(avance por) (caar rec))) (caar rec))
+		(if (null calleactual) (describir (cdr rec) (append desc (list '(avance por) (caar rec) (cadar rec) '(cuadras))) (caar rec))
 			(describir (cdr rec) (append desc (list '(y gire en) (caar rec) '(y avance) (cadar rec) '(cuadras)) ) (caar rec))
 		)
 	)
 )
 
-
+(defun comollegar (a b)
+	(describir (comprimir (car (traducirrutas (list (caminomin a b)) esquinas calles))  nil nil) nil nil)
+)
 
 ;(trace vecinos);(trace gps)
-(gps 'a 'd )
-(caminomin 'a 'd)
-(caminomax 'a 'd)
+;(gps 'a 'd )
+;(caminomin 'a 'd)
+;(caminomax 'a 'd)
 ;(buscarcalle '(3) calles)
 ;(getcallesesquina 'a esquinas)
 ;(getcallesesquina 'b esquinas)
@@ -150,5 +152,6 @@
 ;(trace traducircamino(trace traducircamino))
 ;(trace describir)
 ;(describircamino '(a a b) nil nil ) 
-(traducirrutas (caminomax 'a 'd) esquinas calles)
-(describir (comprimir (car (traducirrutas (caminomax 'a 'd) esquinas calles))  nil nil) nil nil)
+;(traducirrutas (caminomax 'a 'd) esquinas calles)
+;(describir (comprimir (car (traducirrutas (caminomax 'a 'd) esquinas calles))  nil nil) nil nil)
+(comollegar 'k 'i)
