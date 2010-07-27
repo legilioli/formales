@@ -118,15 +118,17 @@
 	)
 )
 
+; funcion para comparar el resultado de la evaluacion del interprete del tp
+; contra la evaluacion que realiza el interprete real mediante la funcion eval
 (defun testexpr (expr)
 	(if (equal (eval expr) (evaluar expr nil)) T
 		(list expr (eval expr) (evaluar expr nil))
 	)
 )
 
+; tests
 (testexpr nil)
 (testexpr '(quote ( a b c)) )
-;(testexpr 'atomo )
 (testexpr '(and t t) )
 (testexpr '(or t t))
 (testexpr '(or nil t))
@@ -137,7 +139,6 @@
 (testexpr '(car (quote (1 2 3))) )
 (testexpr '(cdr (quote (1 2 3))) )
 (testexpr '(cons 1 (quote (2 3 4))) )
-;(testexpr '(lambda (x) (+ x 1)) )
 (testexpr '((lambda (x) (+ x 1)) 1) )
 (testexpr '(cond (nil 'cond1) (nil 'cond2) ) )
 (testexpr '(mapcar 'atom (quote ((1) 2 a))) )
@@ -150,12 +151,14 @@
 (testexpr '(length (quote (1 2 3))))
 (testexpr '(null nil ))
 (testexpr '(list 1 2 3 ))
-;(print (evaluar (read ) nil))
 
-;TESTS
-
-(evaluar '(x 1) nil)
-
-(evaluar '((noexiste 2) 1) nil)
-
-(evaluar '((if (null t) '+ '-) 2 2) nil)
+;ejemplos de corridas varios
+(evaluar '(quote (a b c)) nil) ;(a b c)
+(evaluar '(list 1 b 2 d 3) '((b a) (d b) )) ;(a b c d e)
+(evaluar '(lambda (x) (+ x 1) ) nil) ;(lambda (x) (+ x 1))
+(evaluar '(l1 10) '((l1 (lambda (x) (+ x 1))))) ;11
+(evaluar '(+ (+ a 1) b) '((a 1) (b 2)) ) ;4
+(evaluar '(l1 l2) '((l1 (lambda (x) x )) (l2 (lambda (y) z))) ) ;(lambda (y) z)
+(evaluar '(x 1) nil) ;error
+(evaluar '((noexiste 2) 1) nil) ;error
+(evaluar '((if (null t) '+ '-) 2 2) nil) ;0
