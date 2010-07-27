@@ -221,4 +221,4 @@
 ;(run '((int i j)(main () )) nil)
 
 
-(evaluar (car (inf_a_pref  '(< 2 (1 + 3)) nil nil)) nil )
+;(evaluar (car (inf_a_pref  '(< 2 (1 + 3)) nil nil)) nil )
